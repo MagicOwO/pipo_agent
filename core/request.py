@@ -1,53 +1,44 @@
-"""UserRequest class for structured representation of user requests."""
+"""Request class for agent inputs."""
 
-from typing import List, Optional
-
+from typing import Any, Dict, Optional
 import langfun as lf
 import pyglove as pg
 
-class UserRequest(pg.Object):
-    """Structured representation of a user's request."""
+class Request(pg.Object):
+    """Container for agent execution request."""
     
-    raw_text: str = pg.field(description="Original raw text of the request")
-    goal: str = pg.field(description="Extracted primary goal/objective")
-    subtasks: List[str] = pg.field(
-        default=[],
-        description="List of identified subtasks to achieve the goal"
+    goal: str = pg.Field(
+        str, str,
+        description="Natural language goal to accomplish"
     )
-    constraints: List[str] = pg.field(
-        default=[],
-        description="List of identified constraints or requirements"
+    context: Dict[str, Any] = pg.Field(
+        Dict[str, Any], Dict[str, Any],
+        default={},
+        description="Additional context for execution"
     )
-    context: Optional[dict] = pg.field(
-        default=None,
-        description="Additional context or parameters extracted from the request"
+    metadata: Dict[str, Any] = pg.Field(
+        Dict[str, Any], Dict[str, Any],
+        default={},
+        description="Additional metadata about the request"
     )
-    
+
     @classmethod
-    def from_text(cls, text: str, lm: lf.LanguageModel) -> 'UserRequest':
-        """Creates a structured UserRequest from raw text using LLM.
+    def from_text(cls, text: str, lm: lf.LanguageModel) -> 'Request':
+        """Creates a structured Request from raw text using LLM.
         
         Args:
-            text: Raw user request text
+            text: Raw input text to parse
             lm: Language model to use for parsing
             
         Returns:
-            Structured UserRequest object
+            Structured Request object
         """
         prompt = """
-        Parse the following user request into a structured format.
-        Extract the main goal, any subtasks needed to achieve it,
-        and any constraints or requirements mentioned.
-        
-        User Request: {{request}}
-        
         Respond with a structured object matching this schema:
         {
-            "raw_text": str,  # Original request text
             "goal": str,      # Primary objective
-            "subtasks": List[str],  # Steps needed
-            "constraints": List[str],  # Requirements/limitations
-            "context": Optional[dict]  # Additional parameters
+            "context": Dict[str, Any],  # Additional parameters
+            "metadata": Dict[str, Any]  # Additional metadata
         }
         """.strip()
         

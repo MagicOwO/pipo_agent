@@ -1,31 +1,45 @@
 """Plan and PlanStep classes for representing execution plans."""
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import langfun as lf
 import pyglove as pg
 
-from core.action import Action
+from .action import Action
 
 class PlanStep(pg.Object):
     """A single step in an execution plan."""
     
-    action: Action = pg.field(description="The action to execute")
-    description: str = pg.field(description="Natural language description of this step")
-    input_mapping: dict = pg.field(
-        default={},
-        description="Mapping of input parameters to outputs from previous steps"
+    action: Action = pg.Field(
+        type='Action',
+        description="The action to execute"
     )
-    output_key: Optional[str] = pg.field(
+    description: str = pg.Field(
+        type='str',
+        description="Natural language description of this step"
+    )
+    input_mapping: Dict[str, str] = pg.Field(
+        type='Dict[str, str]',
+        default={},
+        description="Mapping from previous step outputs to action inputs"
+    )
+    output_key: Optional[str] = pg.Field(
+        type='Optional[str]',
         default=None,
-        description="Key to store this step's output under in execution context"
+        description="Key to store this step's output under"
     )
 
 class Plan(pg.Object):
     """A structured execution plan composed of ordered steps."""
     
-    goal: str = pg.field(description="The original goal/request")
-    steps: List[PlanStep] = pg.field(description="Ordered list of execution steps")
+    goal: str = pg.Field(
+        type='str',
+        description="The original goal/request"
+    )
+    steps: List[PlanStep] = pg.Field(
+        type='List[PlanStep]',
+        description="Ordered list of execution steps"
+    )
     
     def describe(self) -> str:
         """Returns a natural language description of the plan."""

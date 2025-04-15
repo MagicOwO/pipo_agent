@@ -1,22 +1,29 @@
-"""Result class for structured representation of agent outputs."""
+"""Result class for storing execution outputs."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import langfun as lf
 import pyglove as pg
 
 class Result(pg.Object):
-    """Structured representation of agent execution results."""
+    """Container for execution results."""
     
-    summary: str = pg.field(description="Natural language summary of the results")
-    raw_outputs: Dict[str, Any] = pg.field(
+    summary: str = pg.Field(
+        Union[str, dict], Union[str, dict],
+        description="Natural language summary of the results"
+    )
+    raw_outputs: Dict[str, Any] = pg.Field(
+        Dict[str, Any], Dict[str, Any],
+        default={},
         description="Raw outputs from each execution step"
     )
-    error: Optional[str] = pg.field(
+    error: Optional[str] = pg.Field(
+        Optional[str], Optional[str],
         default=None,
         description="Error message if execution failed"
     )
-    metadata: Dict[str, Any] = pg.field(
+    metadata: Dict[str, Any] = pg.Field(
+        Dict[str, Any], Dict[str, Any],
         default={},
         description="Additional metadata about the execution"
     )
@@ -33,6 +40,11 @@ class Result(pg.Object):
         if self.error:
             return f"Error: {self.error}"
             
+        # Handle summary that might be a string or dict
+        summary_text = self.summary
+        if isinstance(self.summary, dict):
+            summary_text = self.summary.get("summary", str(self.summary))
+            
         prompt = """
         Generate a detailed natural language description of these execution results.
         Focus on the key findings and insights, while maintaining a professional tone.
@@ -48,7 +60,7 @@ class Result(pg.Object):
             prompt,
             str,
             lm=lm,
-            summary=self.summary,
+            summary=summary_text,
             outputs=self.raw_outputs,
             metadata=self.metadata
         ) 

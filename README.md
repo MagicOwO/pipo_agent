@@ -8,11 +8,64 @@ PIPO (Program In Program Out) is a modular and extensible AI agent framework bui
 - Execute complex workflows using reusable actions
 - Provide structured results
 
-## Installation
+## Quick Start
+
+Follow these steps to get started with PIPO Agent:
+
+### 1. First-time Setup
+
+Run the appropriate setup script for your platform:
 
 ```bash
-pip install -r requirements.txt
+# On Linux/macOS:
+chmod +x setup_env.sh
+./setup_env.sh
+
+# On Windows:
+./setup_env.bat
 ```
+
+After running the setup script:
+1. Open the `.env` file that was created
+2. Replace the placeholder with your OpenAI API key:
+   ```
+   OPENAI_API_KEY=your-actual-key-here
+   ```
+
+### 2. Running Examples
+
+Each time you want to run the examples:
+
+1. First, activate the virtual environment:
+   ```bash
+   # On Linux/macOS:
+   source .venv/bin/activate
+   
+   # On Windows:
+   .\.venv\Scripts\activate
+   ```
+
+2. Then run one of the examples:
+   ```bash
+   python run.py code     # Run code transformation example
+   # or
+   python run.py research # Run research task example
+   ```
+
+3. When you're finished, deactivate the virtual environment:
+   ```bash
+   deactivate
+   ```
+
+### Troubleshooting
+
+If you encounter an error related to `libmagic` or `python-magic` on Windows, you can manually install it:
+
+```bash
+pip install python-magic-bin
+```
+
+This is needed because Langfun's full installation depends on libraries that require additional setup on Windows systems.
 
 ## Core Components
 

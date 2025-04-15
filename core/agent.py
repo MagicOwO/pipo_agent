@@ -7,7 +7,7 @@ import pyglove as pg
 
 from core.action import Action, get_registered_actions
 from core.plan import Plan, PlanStep
-from core.request import UserRequest
+from core.request import Request
 from core.result import Result
 
 class Agent:
@@ -33,10 +33,10 @@ class Agent:
         """
         try:
             # Parse request into structured format
-            user_request = UserRequest.from_text(request, self.lm)
+            structured_request = Request.from_text(request, self.lm)
             
             # Generate execution plan
-            plan = self._generate_plan(user_request)
+            plan = self._generate_plan(structured_request)
             
             # Validate plan
             is_valid, error = plan.validate()
@@ -57,7 +57,7 @@ class Agent:
                 error=str(e)
             )
             
-    def _generate_plan(self, request: UserRequest) -> Plan:
+    def _generate_plan(self, request: Request) -> Plan:
         """Generate an execution plan for the request.
         
         Args:
@@ -76,29 +76,54 @@ class Agent:
         Each step must use a valid action and specify how its inputs map to previous outputs.
         
         Request Goal: {{request.goal}}
-        Subtasks: {{request.subtasks}}
-        Constraints: {{request.constraints}}
+        Context: {{request.context}}
         
         Available Actions:
         {{action_descriptions}}
         
-        Generate a Plan object with the following schema:
+        Respond with a Plan object with this schema:
         {
             "goal": str,  # Original goal
-            "steps": List[PlanStep]  # Where PlanStep has:
-                - action: Action configuration
-                - description: str  # Natural language description
-                - input_mapping: dict  # Maps params to previous outputs
-                - output_key: Optional[str]  # Key to store output
+            "steps": [  # List of PlanStep objects
+                {
+                    "action": str,  # Action name
+                    "description": str,  # Natural language description
+                    "input_mapping": dict,  # Maps params to previous outputs
+                    "output_key": str  # Key to store output (required)
+                }
+            ]
         }
         """.strip()
         
-        return lf.query(
+        # First get the plan as a dict to ensure proper parsing
+        plan_dict = lf.query(
             prompt,
-            Plan,
+            dict,
             lm=self.lm,
             request=request,
             action_descriptions="\n\n".join(action_descriptions)
+        )
+        
+        # Convert action names to actual Action objects
+        actions = get_registered_actions()
+        steps = []
+        for step_dict in plan_dict["steps"]:
+            action_name = step_dict["action"]
+            if action_name not in actions:
+                raise ValueError(f"Unknown action: {action_name}")
+            
+            action_cls = actions[action_name]
+            step = PlanStep(
+                action=action_cls(),
+                description=step_dict["description"],
+                input_mapping=step_dict["input_mapping"],
+                output_key=step_dict["output_key"]
+            )
+            steps.append(step)
+        
+        return Plan(
+            goal=plan_dict["goal"],
+            steps=steps
         )
         
     def _execute_plan(self, plan: Plan) -> Result:
