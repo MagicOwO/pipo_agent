@@ -1,50 +1,36 @@
 """Request class for agent inputs."""
 
 from typing import Any, Dict, Optional
-import langfun as lf
 import pyglove as pg
+import langfun as lf
 
+@pg.members([
+    ('goal', pg.typing.Str(), 'Natural language goal to accomplish', {}),
+    ('context', 'Dict[str, Any]', 'Additional context for the request', {'default': {}}),
+    ('metadata', 'Dict[str, Any]', 'Additional metadata for the request', {'default': {}}),
+])
 class Request(pg.Object):
     """Container for agent execution request."""
-    
-    goal: str = pg.Field(
-        str, str,
-        description="Natural language goal to accomplish"
-    )
-    context: Dict[str, Any] = pg.Field(
-        Dict[str, Any], Dict[str, Any],
-        default={},
-        description="Additional context for execution"
-    )
-    metadata: Dict[str, Any] = pg.Field(
-        Dict[str, Any], Dict[str, Any],
-        default={},
-        description="Additional metadata about the request"
-    )
 
     @classmethod
-    def from_text(cls, text: str, lm: lf.LanguageModel) -> 'Request':
+    def from_text(cls, text: str, lm: lf.LanguageModel | None = None) -> 'Request':
         """Creates a structured Request from raw text using LLM.
         
         Args:
-            text: Raw input text to parse
-            lm: Language model to use for parsing
+            text: Raw input text to parse.
+            lm: Language model to use for parsing. If None, the default LM is used.
             
         Returns:
-            Structured Request object
+            Structured Request object.
         """
-        prompt = """
-        Respond with a structured object matching this schema:
-        {
-            "goal": str,      # Primary objective
-            "context": Dict[str, Any],  # Additional parameters
-            "metadata": Dict[str, Any]  # Additional metadata
-        }
-        """.strip()
-        
+        # Simple case: if the text is short and likely just the goal.
+        # A more robust implementation might use LLM prompting for this too.
+        if len(text.split()) < 30: # Heuristic threshold 
+             return cls(goal=text)
+
+        # Use LLM to parse more complex text into the Request schema
         return lf.query(
-            prompt,
-            cls,
-            lm=lm,
-            request=text
+            prompt=f"Parse the following user request into a structured Request object. Extract the main goal and any relevant context or metadata provided.\n\nUser Request: {text}",
+            schema=cls,
+            lm=lm or lf.get_lm() # Use provided LM or default
         ) 

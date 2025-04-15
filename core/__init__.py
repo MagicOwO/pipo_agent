@@ -4,10 +4,12 @@ These components provide the foundation for creating agents that transform
 input programs into output programs through structured object-oriented execution.
 """
 
+from typing import Any, Dict, List, Optional, Union
+
 from core.action import Action, register_action, get_registered_actions
 from core.agent import Agent
 from core.plan import Plan, PlanStep
-from core.request import UserRequest
+from core.request import Request
 from core.result import Result
 
 __all__ = [
@@ -15,8 +17,8 @@ __all__ = [
     'Agent',
     'Plan',
     'PlanStep',
+    'Request',
     'Result',
-    'UserRequest',
     'register_action',
     'get_registered_actions',
 ] 

@@ -1,66 +1,82 @@
-"""Result class for storing execution outputs."""
+"""Result class for representing execution results."""
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
-import langfun as lf
 import pyglove as pg
+import langfun as lf
 
+@pg.members([
+    ('summary', pg.typing.Union([pg.typing.Str(), 'Dict[str, Any]']), 'Summary of the execution result', {'default': {}}),
+    ('raw_outputs', 'Dict[str, Any]', 'Raw outputs from each step', {'default': {}}),
+    ('error', pg.typing.Union([pg.typing.Str(), type(None)]), 'Error message if execution failed', {'default': None}),
+    ('metadata', 'Dict[str, Any]', 'Additional metadata about the execution', {'default': {}}),
+])
 class Result(pg.Object):
-    """Container for execution results."""
-    
-    summary: str = pg.Field(
-        Union[str, dict], Union[str, dict],
-        description="Natural language summary of the results"
-    )
-    raw_outputs: Dict[str, Any] = pg.Field(
-        Dict[str, Any], Dict[str, Any],
-        default={},
-        description="Raw outputs from each execution step"
-    )
-    error: Optional[str] = pg.Field(
-        Optional[str], Optional[str],
-        default=None,
-        description="Error message if execution failed"
-    )
-    metadata: Dict[str, Any] = pg.Field(
-        Dict[str, Any], Dict[str, Any],
-        default={},
-        description="Additional metadata about the execution"
-    )
-    
-    def to_text(self, lm: lf.LanguageModel) -> str:
-        """Generates a detailed natural language description of the results.
-        
-        Args:
-            lm: Language model to use for text generation
-            
-        Returns:
-            Formatted text description of results
-        """
-        if self.error:
+    """Result of executing a plan."""
+
+    @property
+    def success(self) -> bool:
+        """Returns whether the execution was successful."""
+        return self.error is None
+
+    def __str__(self) -> str:
+        """Returns a string representation of the result."""
+        if not self.success:
             return f"Error: {self.error}"
+        
+        summary_str = ""
+        if isinstance(self.summary, str):
+            summary_str = self.summary
+        elif isinstance(self.summary, dict):
+            summary_str = ", ".join(f'{k}: {v}' for k, v in self.summary.items())
+        else:
+            summary_str = str(self.summary)
             
-        # Handle summary that might be a string or dict
-        summary_text = self.summary
-        if isinstance(self.summary, dict):
-            summary_text = self.summary.get("summary", str(self.summary))
+        return f"Success: {summary_str}"
+
+    def to_text(self) -> str:
+        """Returns a detailed natural language description of the results.
+        
+        (Currently returns a simple formatted string. Could be enhanced with lf.query).
+        """
+        if not self.success:
+            return f"Execution failed: {self.error}"
             
-        prompt = """
-        Generate a detailed natural language description of these execution results.
-        Focus on the key findings and insights, while maintaining a professional tone.
+        lines = ["Execution completed successfully."]
         
-        Summary: {{summary}}
+        # Format Summary
+        lines.append("\nSummary:")
+        if isinstance(self.summary, str):
+            lines.append(f"  {self.summary}")
+        elif isinstance(self.summary, dict):
+            for key, value in self.summary.items():
+                lines.append(f"  - {key}: {value}")
+        else:
+             lines.append(f"  {str(self.summary)}")
+                
+        # Format Raw Outputs (Optional - can be verbose)
+        if self.raw_outputs:
+            lines.append("\nRaw Step Outputs:")
+            for key, value in self.raw_outputs.items():
+                 # Basic representation, could be improved
+                lines.append(f"  - {key}: {str(value)[:100]}...") 
+
+        # Format Metadata
+        if self.metadata:
+            lines.append("\nMetadata:")
+            for key, value in self.metadata.items():
+                lines.append(f"  - {key}: {value}")
+                
+        return "\n".join(lines)
         
-        Raw Outputs: {{outputs}}
-        
-        Additional Context: {{metadata}}
-        """.strip()
-        
-        return lf.query(
-            prompt,
-            str,
-            lm=lm,
-            summary=summary_text,
-            outputs=self.raw_outputs,
-            metadata=self.metadata
-        ) 
+    # Potential future enhancement using Langfun for summarization:
+    # def summarize_with_llm(self, lm: lf.LanguageModel | None = None) -> str:
+    #     lm = lm or lf.get_lm()
+    #     prompt = (
+    #         f"Summarize the following execution result:\n"
+    #         f"Success: {self.success}\n"
+    #         f"Summary Data: {self.summary}\n"
+    #         f"Error: {self.error}\n"
+    #         # Consider adding excerpts from raw_outputs if needed
+    #     )
+    #     return lf.query(prompt, lm=lm) 
