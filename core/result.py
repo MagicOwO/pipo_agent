@@ -6,10 +6,10 @@ import pyglove as pg
 import langfun as lf
 
 @pg.members([
-    ('summary', pg.typing.Union([pg.typing.Str(), 'Dict[str, Any]']), 'Summary of the execution result', {'default': {}}),
-    ('raw_outputs', 'Dict[str, Any]', 'Raw outputs from each step', {'default': {}}),
-    ('error', pg.typing.Union([pg.typing.Str(), type(None)]), 'Error message if execution failed', {'default': None}),
-    ('metadata', 'Dict[str, Any]', 'Additional metadata about the execution', {'default': {}}),
+    ('summary', pg.typing.Union([pg.typing.Str(), pg.typing.Dict()]), 'Summary of the execution result', {'default': {}}),
+    ('raw_outputs', pg.typing.Dict(), 'Raw outputs from each step', {'default': {}}),
+    ('error', pg.typing.Str(), 'Error message if execution failed', {'default': ''}),
+    ('metadata', pg.typing.Dict(), 'Additional metadata about the execution', {'default': {}}),
 ])
 class Result(pg.Object):
     """Result of executing a plan."""
@@ -17,7 +17,7 @@ class Result(pg.Object):
     @property
     def success(self) -> bool:
         """Returns whether the execution was successful."""
-        return self.error is None
+        return not self.error
 
     def __str__(self) -> str:
         """Returns a string representation of the result."""

@@ -6,8 +6,8 @@ import langfun as lf
 
 @pg.members([
     ('goal', pg.typing.Str(), 'Natural language goal to accomplish', {}),
-    ('context', 'Dict[str, Any]', 'Additional context for the request', {'default': {}}),
-    ('metadata', 'Dict[str, Any]', 'Additional metadata for the request', {'default': {}}),
+    ('context', pg.typing.Dict(), 'Additional context for the request', {'default': {}}),
+    ('metadata', pg.typing.Dict(), 'Additional metadata for the request', {'default': {}}),
 ])
 class Request(pg.Object):
     """Container for agent execution request."""

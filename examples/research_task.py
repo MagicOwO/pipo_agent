@@ -32,7 +32,7 @@ def main():
     
     # Print initial findings
     print("Initial Research Results:")
-    print(result.to_text(lm))
+    print(result.to_text())
     print("\n" + "="*80 + "\n")
     
     # Step 2: Deep dive into specific product
@@ -49,7 +49,7 @@ def main():
     
     # Print detailed analysis
     print("Detailed Analysis:")
-    print(result.to_text(lm))
+    print(result.to_text())
 
 if __name__ == "__main__":
     main() 

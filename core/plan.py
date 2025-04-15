@@ -5,21 +5,20 @@ from typing import Any, Dict, List, Optional, Tuple
 import pyglove as pg
 import langfun as lf
 
-from .action import Action
-from .global_state import get_action_registry # Assuming registry is managed here
+from .action import Action, get_registered_actions
 
 @pg.members([
-    ('action', pg.typing.Object(Action), 'The action to execute', {}),
+    ('action', pg.typing.Object('Action'), 'The action to execute', {}),
     ('description', pg.typing.Str(), 'Natural language description of this step', {}),
-    ('input_mapping', 'Dict[str, str]', 'Mapping from previous step outputs to action inputs', {'default': {}}),
-    ('output_key', pg.typing.Union([pg.typing.Str(), type(None)]), 'Key to store this step\'s output under', {'default': None}),
+    ('input_mapping', pg.typing.Dict(), 'Mapping from previous step outputs to action inputs', {'default': {}}),
+    ('output_key', pg.typing.Str(), 'Key to store this step\'s output under', {'default': ''}),
 ])
 class PlanStep(pg.Object):
     """A single step in an execution plan."""
 
 @pg.members([
     ('goal', pg.typing.Str(), 'The original goal/request', {}),
-    ('steps', pg.typing.List('PlanStep'), 'Ordered list of execution steps', {'default': []}),
+    ('steps', pg.typing.List(pg.typing.Object('PlanStep')), 'Ordered list of execution steps', {'default': []}),
 ])
 class Plan(pg.Object):
     """A structured execution plan composed of ordered steps."""
@@ -50,7 +49,7 @@ class Plan(pg.Object):
         Returns:
             Tuple of (is_valid: bool, error_message: str)
         """
-        registry = get_action_registry()
+        registry = get_registered_actions()
         lm = lm or lf.get_lm()
 
         # 1. Check if we have any steps
