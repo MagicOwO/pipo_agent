@@ -1,0 +1,5 @@
+langfun>=0.1.1
+pyglove>=0.3.1
+python-dotenv>=1.0.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0 
