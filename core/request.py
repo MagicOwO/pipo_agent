@@ -25,8 +25,8 @@ class Request(pg.Object):
         """
         # Simple case: if the text is short and likely just the goal.
         # A more robust implementation might use LLM prompting for this too.
-        if len(text.split()) < 30: # Heuristic threshold 
-             return cls(goal=text)
+        if len(text.split()) < 100: # Heuristic threshold 
+             return cls(goal=text, context={}, metadata={})
 
         # Use LLM to parse more complex text into the Request schema
         return lf.query(

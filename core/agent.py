@@ -33,8 +33,10 @@ class Agent:
             Structured Result object
         """
         try:
+            print(f"Raw request: {request}")
             # Parse request into structured format
             structured_request = Request.from_text(request, self.lm)
+            print(f"Structured request: {structured_request}")
             
             # Generate execution plan
             plan = self._generate_plan(structured_request)
