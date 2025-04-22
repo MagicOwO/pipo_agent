@@ -36,20 +36,20 @@ def main():
     print("\n" + "="*80 + "\n")
     
     # Step 2: Deep dive into specific product
-    print("Deep diving into most significant product...")
-    result = agent.process_request(
-        """Based on the previous findings, identify the most significant AI product 
-        launch and create a detailed analysis of its:
-        - Technical architecture
-        - Market positioning
-        - Competition
-        - Future potential
-        """
-    )
+    # print("Deep diving into most significant product...")
+    # result = agent.process_request(
+    #     """Based on the previous findings, identify the most significant AI product 
+    #     launch and create a detailed analysis of its:
+    #     - Technical architecture
+    #     - Market positioning
+    #     - Competition
+    #     - Future potential
+    #     """
+    # )
     
-    # Print detailed analysis
-    print("Detailed Analysis:")
-    print(result.to_text())
+    # # Print detailed analysis
+    # print("Detailed Analysis:")
+    # print(result.to_text())
 
 if __name__ == "__main__":
     main() 
