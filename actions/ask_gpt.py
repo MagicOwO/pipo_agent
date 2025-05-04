@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from ..naive_demo import StepResult
 
 class AskGPT(Action):
-    """Action to ask GPT a specific question to get information. Time consumption for this action is medium."""
+    """Action to query GPT for specific information. This action has medium time consumption and provides medium-detail responses."""
     query: str
     description = "Asks GPT a specific question to get information."
     estimated_duration_seconds = 5.0 # LLM calls take time
