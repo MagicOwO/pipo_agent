@@ -10,7 +10,7 @@ class AskGPT(Action):
     """Action to ask GPT a specific question to get information. Time consumption for this action is medium."""
     query: str
     description = "Asks GPT a specific question to get information."
-    estimated_duration_seconds = 3.0 # LLM calls take time
+    estimated_duration_seconds = 5.0 # LLM calls take time
 
     def __call__(self, question: str, past_steps: list['StepResult']) -> str:
         """Uses GPT to answer the specific query based on the overall question and past steps."""

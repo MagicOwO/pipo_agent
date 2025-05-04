@@ -94,7 +94,8 @@ def static_solve(questions: str) -> str:
     while True: # Loop for plan refinement
         if current_plan:
             prompt = f"""Given the question: {{{question}}}
-            The previous plan was: {current_plan}
+            The previous plan was:
+            {{{current_plan}}}
             The user provided the following feedback for modification: {user_feedback}
             Generate a revised plan (sequence of steps with thought and action) based on the feedback. Only use the available actions.
             The final step's action must be FinalAnswer."""
@@ -107,6 +108,7 @@ def static_solve(questions: str) -> str:
             prompt,
             Plan,
             question=questions,
+            current_plan=current_plan,
             lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY"))
         )
 

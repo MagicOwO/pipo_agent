@@ -1,5 +1,6 @@
 import pyglove as pg
 from .base import Action
+import requests
 import os
 import openai
 from typing import TYPE_CHECKING
@@ -10,11 +11,11 @@ if TYPE_CHECKING:
 class AskPerplexity(Action):
     """Action to query the Perplexity AI service. Time consumption for this action is high."""
     query: str
-    description = "Queries the Perplexity AI online model (e.g., llama-3-sonar-small-32k-online) to answer a question or retrieve up-to-date information."
+    description = "Queries the Perplexity AI online model (e.g., llama-3-sonar-large-32k-online) to answer a question or retrieve up-to-date information."
     estimated_duration_seconds = 15.0 # Online models can take longer
 
     # Add model parameter if you want to easily switch between pplx models
-    model = pg.typing.Str(default="llama-3-sonar-small-32k-online")
+    model = "llama-3-sonar-large-32k-online"
 
     def __call__(self, question: str, past_steps: list['StepResult'], *args, **kwargs):
         """Executes the Perplexity query using the pplx-api (openai v0.27.2 compatible)."""
@@ -22,53 +23,27 @@ class AskPerplexity(Action):
         if not api_key:
             raise ValueError("PERPLEXITY_API_KEY environment variable not set.")
 
-        # Configure openai for Perplexity API (v0.27.2 style)
-        openai.api_key = api_key
-        openai.api_base = "https://api.perplexity.ai"
+        url = "https://api.perplexity.ai/chat/completions"
 
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are an AI assistant accessing up-to-date information. "
-                    "Provide concise and accurate answers based on your online search capabilities."
-                ),
-            },
-            {
-                "role": "user",
-                "content": self.query,
-            },
-        ]
+        # Set up headers with the API key
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
 
-        try:
-            print(f"---> Calling Perplexity API (v0.27.2 style) for query: {self.query}")
-            # Use openai.ChatCompletion.create (v0.27.2 style)
-            response = openai.ChatCompletion.create(
-                model=self.model, # Use the model attribute
-                messages=messages,
-            )
-            # Extract the response content
-            answer = response['choices'][0]['message']['content']
-            print(f"---> Perplexity Response Received.")
-            # Reset API base and key if other actions use default openai
-            openai.api_base = "https://api.openai.com/v1" # Or your default
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-            return answer
-        except openai.error.APIConnectionError as e:
-            # Reset API base and key even on error
-            openai.api_base = "https://api.openai.com/v1"
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-            return f"Perplexity API Connection Error: {e}"
-        except openai.error.RateLimitError as e:
-            openai.api_base = "https://api.openai.com/v1"
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-            return f"Perplexity API Rate Limit Error: {e}"
-        except openai.error.APIError as e: # Catch generic API errors
-            openai.api_base = "https://api.openai.com/v1"
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-            return f"Perplexity API Error: {e} (Status code: {e.http_status})"
-        except Exception as e:
-            # Reset API base and key for any other unexpected errors
-            openai.api_base = "https://api.openai.com/v1"
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-            return f"An unexpected error occurred while calling Perplexity API: {e}" 
+        # Define the payload with model and messages
+        payload = {
+            "model": "sonar-pro",
+            "messages": [
+                {"role": "system", "content": "Be precise and concise."},
+                {"role": "user", "content": self.query}
+            ],
+            "temperature": 0.2,
+            "max_tokens": 100
+        }
+
+        # Make the POST request to the API
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()  # Raise an error for bad status codes
+        data = response.json()
+        return data['choices'][0]['message']['content']
