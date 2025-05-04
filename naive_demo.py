@@ -93,11 +93,11 @@ def static_solve(questions: str) -> str:
             prompt = f"""Given the question: {{{question}}}
             The previous plan was: {current_plan}
             The user provided the following feedback for modification: {user_feedback}
-            Generate a revised plan (sequence of steps with thought and action) based on the feedback.
+            Generate a revised plan (sequence of steps with thought and action) based on the feedback. Only use the available actions.
             The final step's action must be FinalAnswer."""
         else:
             prompt = f"""Given the question: {{{question}}}
-            What is the plan (sequence of steps with thought and action) to solve the question?
+            What is the plan (sequence of steps with thought and action) to solve the question? Only use the available actions.
             The final step's action must be FinalAnswer."""
 
         plan = lf.query(
@@ -132,6 +132,7 @@ def static_solve(questions: str) -> str:
             return "Plan rejected."
         else:
             # Assume any other input is modification feedback
+            # TODO: improve the reliability of the plan revision process.
             user_feedback = user_input
             current_plan = plan # Store the plan that will be modified
             print("Revising plan based on feedback...")
@@ -163,7 +164,7 @@ def static_solve(questions: str) -> str:
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in ['dynamic', 'static']:
         raise ValueError(f"Invalid run type: {sys.argv}")
-    question = "Introduce AI product relese from big tech companies in 2024?"
+    question = "Introduce AI product relese from big tech companies in 2021?"
     run_type = sys.argv[1]
     if run_type == "dynamic":
         answer, past_steps = dynamic_solve(question)
