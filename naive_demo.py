@@ -49,7 +49,7 @@ if not any(issubclass(cls, FinalAnswer) for cls in AVAILABLE_ACTIONS):
         print("ERROR: Could not import FinalAnswer action!")
         sys.exit("Critical action FinalAnswer is missing.")
 
-
+# TODO: (P1) better organize the code.
 class Step(pg.Object):
     thought: str
     action: Action
@@ -63,6 +63,7 @@ class Plan(pg.Object):
     thought: str
 
 def dynamic_solve(questions: str, max_steps: int = 10) -> tuple[str | None, list[StepResult]]:
+    # TODO: (P1) implement the dynamic solve process.
     past_steps = []
 
     for _ in range(max_steps):
@@ -85,6 +86,8 @@ def dynamic_solve(questions: str, max_steps: int = 10) -> tuple[str | None, list
     return None, past_steps
 
 def static_solve(questions: str) -> str:
+    # TODO: (P1) improve the quality of the generated plan: 1.Unnecessary steps. 2.Not properly use the available actions.
+    # TODO: (P1) better handle the issue of no valid result from the information retrieval process.
     current_plan = None
     user_feedback = ""
 
@@ -132,7 +135,7 @@ def static_solve(questions: str) -> str:
             return "Plan rejected."
         else:
             # Assume any other input is modification feedback
-            # TODO: improve the reliability of the plan revision process.
+            # TODO: (P0) improve the reliability of the plan revision process.
             user_feedback = user_input
             current_plan = plan # Store the plan that will be modified
             print("Revising plan based on feedback...")
