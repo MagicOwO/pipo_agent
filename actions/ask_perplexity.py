@@ -18,7 +18,7 @@ class AskPerplexity(Action):
     model = "llama-3-sonar-large-32k-online"
 
     def __call__(self, question: str, past_steps: list['StepResult'], *args, **kwargs):
-        """Executes the Perplexity query using the pplx-api (openai v0.27.2 compatible)."""
+        """Executes the Perplexity query."""
         api_key = os.getenv("PERPLEXITY_API_KEY")
         if not api_key:
             raise ValueError("PERPLEXITY_API_KEY environment variable not set.")

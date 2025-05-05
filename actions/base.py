@@ -9,7 +9,7 @@ class Action(pg.Object):
     description = "No description provided."
     estimated_duration_seconds = 1.0
 
-    def __call__(self, answer: str, past_steps: list['StepResult'], *args, **kwargs):
+    def __call__(self, question: str, past_steps: list['StepResult'], *args, **kwargs):
         """Executes the action."""
         raise NotImplementedError()
 

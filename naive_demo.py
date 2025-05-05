@@ -91,6 +91,8 @@ def static_solve(questions: str) -> str:
     current_plan = None
     user_feedback = ""
 
+    # TODO: (P0) add resource constraints to the plan generation process.
+    # TODO: (P0) add plan verifier component.
     while True: # Loop for plan refinement
         if current_plan:
             prompt = f"""Given the question: {{{question}}}
