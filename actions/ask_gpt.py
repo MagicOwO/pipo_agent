@@ -15,7 +15,7 @@ class AskGPT(Action):
     def __call__(self, question: str, past_steps: list['StepResult']) -> str:
         """Uses GPT to answer the specific query based on the overall question and past steps."""
         # Retrospective behavior to contextualize the query.
-        reflection_prompt = f"To best answer the question: {question}, and considering the results from the previous steps {past_steps}, please leveraging the previous results to rewrite the original query {self.query} to provide a more focused and accurate query."
+        reflection_prompt = f"To best answer the question: {question}, and considering the results from the previous steps {past_steps}, please leveraging the previous results to rewrite the original query {self.query} to provide a more focused and accurate query. Notice that there might be placeholders in the original query, so please replace them with the actual values."
         reflection_response = lf.query(
             reflection_prompt,
             lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY")),

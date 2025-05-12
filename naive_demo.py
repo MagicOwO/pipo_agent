@@ -101,7 +101,7 @@ def static_solve(questions: str) -> str:
             The final step's action must be FinalAnswer."""
         else:
             prompt = f"""Given the question: {{{question}}}
-            What is the plan (sequence of steps with thought and action) to solve the question? Only use the available actions.
+            What is the plan (sequence of steps with thought and action) to solve the question? Feel free to use placeholders if it depends on results from previous steps. Only use the available actions.
             The final step's action must be FinalAnswer."""
 
         plan = lf.query(
@@ -152,6 +152,8 @@ def static_solve(questions: str) -> str:
     past_steps = []
 
     for i, step in enumerate(current_plan.steps):
+        
+        print("\n" + "-"*40)
         print(f"Executing Step {i}: Action: {type(step.action).__name__}, Thought: {step.thought}")
         try:
             result = step.action(question=questions, past_steps=past_steps)
@@ -178,6 +180,5 @@ if __name__ == "__main__":
             print(f"Step {i}: {step.step.action}, thought: {step.step.thought}")
     elif run_type == "static":
         answer = static_solve(question)
-        print(f"Answer: {answer}")
     else:
         raise ValueError(f"Invalid run type: {run_type}")

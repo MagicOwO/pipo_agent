@@ -19,7 +19,7 @@ class FinalAnswer(Action):
         # If strict type checking is needed at runtime, import StepResult directly (handle potential circularity)
 
         result = lf.query(
-            "Given the question: {{question}} and the past steps: {{past_steps}}, construct the best final answer of the question.",
+            "Given the question: {{question}} and the results from past steps: {{past_steps}}, please combine all the results to construct a detailed and comprehensive report of the question.",
             lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY")),
             question=question,
             past_steps=past_steps,
