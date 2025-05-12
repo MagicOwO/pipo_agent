@@ -1,10 +1,9 @@
 import langfun as lf
 import os
-import pyglove as pg
-from typing import TYPE_CHECKING, Any # Use TYPE_CHECKING to avoid circular import
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..naive_demo import StepResult # Relative import for type hint
+    from ..naive_demo import StepResult
 
 from .base import Action
 
@@ -20,7 +19,7 @@ class FinalAnswer(Action):
         # If strict type checking is needed at runtime, import StepResult directly (handle potential circularity)
 
         result = lf.query(
-            "Given the question: {{question}} and the past steps: {{past_steps}}, what is the final answer?",
+            "Given the question: {{question}} and the past steps: {{past_steps}}, construct the best final answer of the question.",
             lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY")),
             question=question,
             past_steps=past_steps,

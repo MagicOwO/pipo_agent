@@ -51,6 +51,7 @@ if not any(issubclass(cls, FinalAnswer) for cls in AVAILABLE_ACTIONS):
 
 # TODO: (P1) better organize the code.
 class Step(pg.Object):
+    summary: str
     thought: str
     action: Action
 

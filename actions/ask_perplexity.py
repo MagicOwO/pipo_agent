@@ -1,4 +1,5 @@
 import pyglove as pg
+import langfun as lf
 from .base import Action
 import requests
 import os
@@ -19,6 +20,17 @@ class AskPerplexity(Action):
 
     def __call__(self, question: str, past_steps: list['StepResult'], *args, **kwargs):
         """Executes the Perplexity query."""
+        # Retrospective behavior to contextualize the query.
+        reflection_prompt = f"To best answer the question: \"{{main_question}}\", and considering the previous steps {{past_steps}}, please reflect on the specific query {self.query} and provide a more focused and accurate query."
+        reflection_response = lf.query(
+            reflection_prompt,
+            main_question=question,
+            past_steps=past_steps,
+            lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY")),
+            response_type=str # Expect a string answer
+        )
+        print(f"reflection_response: {reflection_response}")
+
         api_key = os.getenv("PERPLEXITY_API_KEY")
         if not api_key:
             raise ValueError("PERPLEXITY_API_KEY environment variable not set.")
@@ -36,7 +48,7 @@ class AskPerplexity(Action):
             "model": "sonar-pro",
             "messages": [
                 {"role": "system", "content": "Be precise and concise."},
-                {"role": "user", "content": self.query}
+                {"role": "user", "content": reflection_response}
             ],
             "temperature": 0.2,
             "max_tokens": 100
