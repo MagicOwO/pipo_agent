@@ -87,13 +87,10 @@ def dynamic_solve(questions: str, max_steps: int = 10) -> tuple[str | None, list
     return None, past_steps
 
 def static_solve(questions: str) -> str:
-    # TODO: (P1) improve the quality of the generated plan: 1.Unnecessary steps. 2.Not properly use the available actions.
-    # TODO: (P1) better handle the issue of no valid result from the information retrieval process.
     current_plan = None
     user_feedback = ""
 
     # TODO: (P0) add resource constraints to the plan generation process.
-    # TODO: (P0) add plan verifier component.
     while True: # Loop for plan refinement
         if current_plan:
             prompt = f"""Given the question: {{{question}}}
