@@ -49,7 +49,6 @@ class AskPerplexity(Action):
                 {"role": "user", "content": reflection_response}
             ],
             "temperature": 0.2,
-            "max_tokens": 100
         }
 
         # Make the POST request to the API
