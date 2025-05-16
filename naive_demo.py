@@ -104,7 +104,6 @@ def static_solve(questions: str) -> str:
             What is the plan (sequence of steps with thought and action) to solve the question? Feel free to use placeholders if it depends on results from previous steps. Only use the available actions.
             The final step's action must be FinalAnswer."""
 
-        print(f"Prompt: {prompt}")
         plan = lf.query(
             prompt,
             Plan,
