@@ -12,7 +12,7 @@ A Streamlit web application for visualizing AI agent planning and execution proc
 
 1. Clone this repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/MagicOwO/pipo_agent
    cd pipo_agent
    ```
 
@@ -64,7 +64,7 @@ A Streamlit web application for visualizing AI agent planning and execution proc
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.10+
 - Streamlit
 - PyGlove
 - LangFun
