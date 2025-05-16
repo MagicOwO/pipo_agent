@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ..naive_demo import StepResult
 
 class AskPerplexity(Action):
-    """Action to query Perplexity for specific information. This action has high time consumption and provides highly detailed responses."""
+    """Action to query Perplexity for specific information. This action has high time consumption and provides highly detailed responses. Is able to search the web. Could get latest information."""
     query: str
     description = "Queries the Perplexity AI online model (e.g., llama-3-sonar-large-32k-online) to answer a question or retrieve up-to-date information."
     estimated_duration_seconds = 15.0 # Online models can take longer

@@ -6,7 +6,7 @@ A Streamlit web application for visualizing AI agent planning and execution proc
 
 - **Two Planning Modes**:
   - **Static Planning**: Generates and executes a complete plan upfront
-  - **Dynamic Planning**: Generates steps one at a time based on previous results
+  - **Dynamic Planning [WIP]**: Generates steps one at a time based on previous results
 
 ## Installation
 
@@ -31,15 +31,10 @@ A Streamlit web application for visualizing AI agent planning and execution proc
    ```
 
 4. Set up environment variables:
-   Copy the `env.example` file to `.env` and update it with your actual API key:
-   ```
-   # Windows
-   copy env.example .env
-   # Linux/Mac
-   cp env.example .env
-   ```
-   
-   Then edit the `.env` file and replace `your_openai_api_key_here` with your actual OpenAI API key.
+
+   Add a new `.env` file in the root and configure your API keys:
+   - `OPENAI_API_KEY=<you api key>`
+   - `PERPLEXITY_API_KEY=<you api key>`
 
 ## Usage
 

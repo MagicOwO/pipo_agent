@@ -6,7 +6,11 @@ import langfun as lf
 import importlib
 import pkgutil
 import inspect # Import inspect
+from dotenv import load_dotenv
 from actions.final_answer import FinalAnswer
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import base Action
 from actions.base import Action
@@ -63,19 +67,19 @@ class Plan(pg.Object):
     steps: list[Step]
     thought: str
 
-def dynamic_solve(questions: str, max_steps: int = 10) -> tuple[str | None, list[StepResult]]:
+def dynamic_solve(query: str, max_steps: int = 10) -> tuple[str | None, list[StepResult]]:
     # TODO: (P1) implement the dynamic solve process.
     past_steps = []
 
     for _ in range(max_steps):
         next_step = lf.query(
-            """Given the question: {{question}}
+            """Given the user request: {{request}}
             Past steps: {{past_steps}}
 
             What is the next step (thought and action) that may get us closer to the solution?
             The action must be one of the available Action types. Use FinalAnswer when the answer is found.""",
             Step,
-            question=questions,
+            request=query,
             past_steps=past_steps,
             lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY"))
         )
@@ -86,30 +90,39 @@ def dynamic_solve(questions: str, max_steps: int = 10) -> tuple[str | None, list
         past_steps.append(StepResult(step=next_step, result=result))
     return None, past_steps
 
-def static_solve(questions: str) -> str:
+def static_solve(query: str) -> str:
     current_plan = None
     user_feedback = ""
 
     # TODO: (P0) add resource constraints to the plan generation process.
     while True: # Loop for plan refinement
         if current_plan:
-            prompt = f"""Given the question: {{{{question}}}}
-            The previous plan was:
-            {{{{current_plan}}}}
-            The user provided the following feedback for modification: {user_feedback}
-            Generate a revised plan (sequence of steps with thought and action) based on the feedback. Only use the available actions.
-            The final step's action must be FinalAnswer."""
+            prompt = f"""You are an intelligent planning agent.
+Given the user request:
+{{{{request}}}}
+and a current plan to resolve it:
+{{{{current_plan}}}}.
+The user provided the following feedback for modification: {user_feedback}.
+Deeply reflect on the original request and the feedback. Analyze the current plan: What should be changed, removed, added, or re-ordered?
+Generate a revised plan that fully addresses the feedback and achieves the goal. \
+Only use the available actions. Your plan must be goal-oriented, efficient, and feedback-aligned. \
+Carefully think about the best plan to solve the user request. The final step's action must be FinalAnswer.
+Output only the revised plan. Do not repeat the request, feedback, or explanations."""
         else:
-            prompt = """Given the question: {{question}}
-            What is the plan (sequence of steps with thought and action) to solve the question? Feel free to use placeholders if it depends on results from previous steps. Only use the available actions.
-            The final step's action must be FinalAnswer."""
+            prompt = """You are an intelligent planning agent.
+Given the user request:
+{{request}}
+Deeply reflect on the user request. Carefully think about the best plan to solve the user request. \
+Generate the best plan. Your plan must be goal-oriented, and efficient. \
+Feel free to use placeholders if it depends on results from previous steps. Only use the available actions.
+The final step's action must be FinalAnswer."""
 
         plan = lf.query(
             prompt,
             Plan,
-            question=questions,
+            request=query,
             current_plan=current_plan,
-            lm=lf.llms.Gpt4(api_key=os.getenv("OPENAI_API_KEY"))
+            lm=lf.llms.Gpt4o(api_key=os.getenv("OPENAI_API_KEY"))
         )
 
         print("\n" + "-"*20 + " Proposed Plan " + "-"*20)
@@ -156,7 +169,7 @@ def static_solve(questions: str) -> str:
         print("\n" + "-"*40)
         print(f"Executing Step {i}: Action: {type(step.action).__name__}, Thought: {step.thought}")
         try:
-            result = step.action(question=questions, past_steps=past_steps)
+            result = step.action(question=query, past_steps=past_steps)
             past_steps.append(StepResult(step=step, result=result))
             print(f"  Result: {result}")
         except Exception as e:
@@ -171,7 +184,9 @@ def static_solve(questions: str) -> str:
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in ['dynamic', 'static']:
         raise ValueError(f"Invalid run type: {sys.argv}")
-    query = "Introduce AI product release from big tech companies in 2021?"
+    query = "Give me a detailed report on 100 most popular AI products."
+    print("\n" + "-"*20 + " User Query " + "-"*20)
+    print(f"{query}")
     run_type = sys.argv[1]
     if run_type == "dynamic":
         answer, past_steps = dynamic_solve(query)
