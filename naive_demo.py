@@ -69,7 +69,7 @@ def dynamic_solve(questions: str, max_steps: int = 10) -> tuple[str | None, list
 
     for _ in range(max_steps):
         next_step = lf.query(
-            f"""Given the question: {{{question}}}
+            """Given the question: {{question}}
             Past steps: {{past_steps}}
 
             What is the next step (thought and action) that may get us closer to the solution?
@@ -93,17 +93,18 @@ def static_solve(questions: str) -> str:
     # TODO: (P0) add resource constraints to the plan generation process.
     while True: # Loop for plan refinement
         if current_plan:
-            prompt = f"""Given the question: {{{question}}}
+            prompt = f"""Given the question: {{{{question}}}}
             The previous plan was:
-            {{{current_plan}}}
+            {{{{current_plan}}}}
             The user provided the following feedback for modification: {user_feedback}
             Generate a revised plan (sequence of steps with thought and action) based on the feedback. Only use the available actions.
             The final step's action must be FinalAnswer."""
         else:
-            prompt = f"""Given the question: {{{question}}}
+            prompt = """Given the question: {{question}}
             What is the plan (sequence of steps with thought and action) to solve the question? Feel free to use placeholders if it depends on results from previous steps. Only use the available actions.
             The final step's action must be FinalAnswer."""
 
+        print(f"Prompt: {prompt}")
         plan = lf.query(
             prompt,
             Plan,
@@ -171,14 +172,14 @@ def static_solve(questions: str) -> str:
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in ['dynamic', 'static']:
         raise ValueError(f"Invalid run type: {sys.argv}")
-    question = "Introduce AI product relese from big tech companies in 2021?"
+    query = "Introduce AI product release from big tech companies in 2021?"
     run_type = sys.argv[1]
     if run_type == "dynamic":
-        answer, past_steps = dynamic_solve(question)
+        answer, past_steps = dynamic_solve(query)
         print(f"Answer: {answer}")
         for i, step in enumerate(past_steps):
             print(f"Step {i}: {step.step.action}, thought: {step.step.thought}")
     elif run_type == "static":
-        answer = static_solve(question)
+        answer = static_solve(query)
     else:
         raise ValueError(f"Invalid run type: {run_type}")
