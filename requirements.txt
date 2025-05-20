@@ -3,4 +3,5 @@ langfun
 streamlit
 streamlit-extras
 openai
-python-dotenv 
+python-dotenv
+python-docx==0.8.11 
